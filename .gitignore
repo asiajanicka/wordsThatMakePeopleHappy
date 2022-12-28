@@ -38,3 +38,5 @@ src/main/resources/result.txt
 
 ### Mac OS ###
 .DS_Store
+/output
+src/main/resources/input.txt
