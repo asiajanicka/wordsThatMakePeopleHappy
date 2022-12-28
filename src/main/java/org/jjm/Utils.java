@@ -1,32 +1,23 @@
 package org.jjm;
 
-import org.apache.commons.lang3.StringUtils;
-
-import javax.swing.text.html.parser.Entity;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
+
     /**
      * Method treats words with hyphen (like ex-wife) and apostrophe (like it's) as single
      *
      * @param content is a text where we count words in
      * @return map with word & number of occurrences as key-value pairs
      */
-    public static HashMap<String, Long> countWordsWithHyphenAndApostrophe(String content) {
-        List<String> words = Pattern.compile("\\w+[-'\\w*]*")
-                .matcher(content)
-                .results()
-                .map(MatchResult::group)
-                .collect(Collectors.toList());
-        HashSet<String> uniqueWords = new HashSet<>(words);
-        HashMap<String, Long> countMap = new HashMap<>();
-        for (String word : uniqueWords) {
-            countMap.put(word, words.stream().filter(w -> w.equals(word)).count());
-        }
-        return countMap;
+    public static Map<String, Long> countWordsWithHyphenAndApostrophe(String content) {
+        return countWordsByPattern("\\w+[-'\\w*]*", content);
     }
 
     /**
@@ -35,18 +26,21 @@ public class Utils {
      * @param content is a text where we count words in
      * @return map with word & number of occurrences as key-value pairs
      */
-    public static HashMap<String, Long> countWords(String content) {
-        String cont = content.replaceAll("\\W", " ").replaceAll("\\s+", ",");
-        List<String> words = Arrays.asList(StringUtils.split(cont, ","));
-        HashMap<String, Long> countMap = new HashMap<>();
-        for (String word : words) {
-            countMap.put(word, words.stream().filter(w -> w.equals(word)).count());
-        }
-        return countMap;
+    public static Map<String, Long> countWords(String content) {
+        return countWordsByPattern("\\w+", content);
     }
 
-    public static List<Map.Entry<String,Long>> sortByValue(Map<String, Long> map) {
+    private static Map<String, Long> countWordsByPattern(String pattern, String content) {
+        return Pattern.compile(pattern)
+                .matcher(content)
+                .results()
+                .map(MatchResult::group)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+    }
+
+    public static List<Map.Entry<String, Long>> sortByValue(Map<String, Long> map) {
         return map.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toList());
     }
+
 }
